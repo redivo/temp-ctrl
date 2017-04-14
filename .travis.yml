@@ -4,6 +4,9 @@ language: c
 # It's needed to install g++4.8 correctly
 dist: trusty
 
+before_install:
+    - pip install --user cpp-coveralls
+
 # Additional packages
 addons:
     apt:
@@ -17,3 +20,5 @@ before_script: cd /usr/src/gtest && sudo cmake CMakeLists.txt && sudo make && su
 # Build and test script
 script: mkdir -p _build && cd _build && cmake .. && make && test/test
 
+after_success:
+    - coveralls --exclude lib --exclude tests --gcov-options '\-lp'

@@ -4,6 +4,7 @@
 find_package (GTest REQUIRED)
 find_package (Threads REQUIRED)
 
+include_directories (${INCLUDE_SRC_DIR})
 
 ####################################################################################################
 # General configuration
@@ -15,6 +16,7 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 # Build
 ####################################################################################################
 add_executable (test
+        ${SOURCE_SRC_DIR}/application.c
         dummy.cc
         )
 

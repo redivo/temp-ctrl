@@ -1,25 +1,19 @@
 /**************************************************************************************************/
 /**
- * \file
- * \brief  Dummy test file
+ * \brief  Target infrastructure
  */
 /**************************************************************************************************/
 
-#include <gtest/gtest.h>
+#ifndef __INFRA_H__
+#define __INFRA_H__
 
-extern "C" {
-#include "defines.h"
-#include "application.h"
-}
 /**************************************************************************************************/
 
-TEST(DummyTest, Dummy)
-{
-	config_t cfg;
-	temperature_t controledTemp;
+/**
+ * \brief  Initialize hardware
+ */
+void hwInit();
 
-	getControledTemperature(&controledTemp);
-	displayInfo(cfg, controledTemp);
-	getInput(&cfg);
-	setConfig(cfg);
-}
+/**************************************************************************************************/
+
+#endif /* __INFRA_H__ */

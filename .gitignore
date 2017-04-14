@@ -34,3 +34,7 @@
 
 # Build directory
 _build*
+
+# Others
+tags
+*.swp

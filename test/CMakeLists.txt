@@ -16,11 +16,10 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 # Build
 ####################################################################################################
 add_executable (test
-        ${SOURCE_SRC_DIR}/application.c
-        dummy.cc
-        )
+    dummy.cc
+)
 
 target_link_libraries (test
-        ${GTEST_BOTH_LIBRARIES}
-        ${CMAKE_THREAD_LIBS_INIT}
+    ${GTEST_BOTH_LIBRARIES}
+    ${CMAKE_THREAD_LIBS_INIT}
 )

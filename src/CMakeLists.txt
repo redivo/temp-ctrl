@@ -1,9 +1,13 @@
 include_directories (${INCLUDE_SRC_DIR})
 
-SET(CMAKE_SYSTEM_NAME Generic)
-SET(CMAKE_C_COMPILER arm-elf-gcc)
-set(CMAKE_C_FLAGS "-c")
+set(TARGET "pc")
 
-add_executable(tmp-ctrl
-    mm.c
+add_executable(temp-ctrl
+    main.c
+    general.c
+    sts_cfg.c
+    infra_${TARGET}.c
+    io_${TARGET}.c
+    temperature_${TARGET}.c
+    timer_${TARGET}.c
 )

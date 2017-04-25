@@ -1,26 +1,26 @@
 /**************************************************************************************************/
 /**
- * \brief  Infrastructure for PUCRS DevKit
+ * \brief  Temperature-related functions
  */
 /**************************************************************************************************/
 
-#include "infra.h"
-#include "timer.h"
-#include "io.h"
 #include "temperature.h"
 
 /**************************************************************************************************/
 
-void hwInit()
+void tempInit()
 {
-    timeInit();
-    ioInit();
-
-    /* Now it's possible to print, so do it! */
-    print("Initializing...\r");
-
-    tempInit();
+    // Do nothing
 }
 
 /**************************************************************************************************/
 
+float readTemperature()
+{
+    /* TODO
+     * This function is not implemented yet, so return a fixed value
+     */
+    return 20;
+}
+
+/**************************************************************************************************/

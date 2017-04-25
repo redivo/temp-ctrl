@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "infra.h"
-#include "time.h"
+#include "timer.h"
 #include "io.h"
 #include "temperature.h"
 #include "sts_cfg.h"
@@ -106,8 +106,8 @@ int main (void)
 
 /**************************************************************************************************/
 
-/* Estas rotinas sao chamados pelo crt.S. 
-Devem existir, mas ainda nao estao sendo usadas */
+/* These routines are called by crt.S 
+They must exist, but probably they're not being used */
 void UNDEF_Routine(){}
 void SWI_Routine(){}
 void FIQ_Routine(){}

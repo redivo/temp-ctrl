@@ -29,7 +29,7 @@ void ioInit();
  * \brief  Print something on standard out
  * \return ERR_NONE in case of success, error code otherwise
  */
-error_t print();
+error_t print(char *txt);
 
 /**************************************************************************************************/
 

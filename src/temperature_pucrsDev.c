@@ -18,7 +18,11 @@
 #define I2C_CONSET_SI_BIT 3
 #define I2C_CONSET_AA_BIT 2
 
-#define LM75_ADDR 0x48
+#define LM75_ONBOARD_ADDR 0x48
+#define LM75_OFFBORD_ADDR 0x4F
+
+#define LM75_ADDR LM75_OFFBORD_ADDR
+
 #define LM75_TEMP_REG 0x00
 
 #define PCONP_I2C0 (1 << 7)

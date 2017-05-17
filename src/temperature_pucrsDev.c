@@ -22,6 +22,7 @@
 #define LM75_OFFBORD_ADDR 0x4F
 
 #define LM75_ADDR LM75_OFFBORD_ADDR
+//#define LM75_ADDR LM75_ONBOARD_ADDR
 
 #define LM75_TEMP_REG 0x00
 
@@ -39,9 +40,12 @@
 
 #define I2C_STAT_WRITE_ACK_RCVD 0x18
 #define I2C_STAT_WRITE_DATA_ACK_RCVD 0x28
+#define I2C_STAT_WRITE_ACK_NOT_RCVD_AFTER_SLV_ADDR 0x20
+#define I2C_STAT_WRITE_ACK_NOT_RCVD_AFTER_BYTE 0x30
 
 #define I2C_STAT_READ_ACK_RCVD 0x40
 #define I2C_STAT_DATA_RCVD 0x50
+#define I2C_STAT_READ_NOT_ACK_RCVD_AFTER_SLV_ADDR 0x48
 #define I2C_STAT_READ_NACK_RCVD 0x58
 
 #define I2C_READ 1
@@ -87,7 +91,6 @@ static void i2c_operation_fsm(uint8_t operation, uint8_t devAddr, uint8_t *data,
     while (1) {
         /* Wait for Interruption */
         while((I20CONSET & I2C_CON_INTERRUPT) == 0);
-        //DEBUG_I2C;
 
         switch (I20STAT) {
             case I2C_STAT_START_BIT_SENT:
@@ -148,6 +151,14 @@ static void i2c_operation_fsm(uint8_t operation, uint8_t devAddr, uint8_t *data,
                 I20CONSET = I2C_CON_STOP;
                 I20CONCLR = I2C_CON_INTERRUPT;
                 return;
+
+            case I2C_STAT_WRITE_ACK_NOT_RCVD_AFTER_SLV_ADDR:
+            case I2C_STAT_WRITE_ACK_NOT_RCVD_AFTER_BYTE:
+            case I2C_STAT_READ_NOT_ACK_RCVD_AFTER_SLV_ADDR:
+            default:
+                I20CONSET = I2C_CON_STOP;
+                I20CONCLR = I2C_CON_INTERRUPT;
+                return;
         }
     }
 }
@@ -190,10 +201,9 @@ void tempInit()
     I20CONCLR = ~i2c_control.reg;
     I20CONSET = i2c_control.reg;
 
-    I20SCLH = 100;//(12000000 / 60) / 2;
-    I20SCLL = 100;//(12000000 / 60) / 2;
+    I20SCLH = 100;
+    I20SCLL = 100;
 
-    //DEBUG_I2C;
     ms_sleep(500);
 }
 

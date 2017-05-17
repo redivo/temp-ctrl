@@ -7,11 +7,16 @@
 #ifndef __STS_CFG_H__
 #define __STS_CFG_H__
 
+#include <stdint.h>
+#include <stdbool.h>
+
 /**************************************************************************************************/
 
 typedef struct {
     float realTemp;
-    int coolerHysteresisTime;
+    uint32_t coolerOnHysteresisTime;
+    uint32_t coolerOffHysteresisTime;
+    bool coolerIsOn;
 } sts_t;
 
 /**************************************************************************************************/

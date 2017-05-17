@@ -15,6 +15,7 @@
 /**************************************************************************************************/
 
 #define TARGET_TEMPERATURE_STEP 0.5
+#define HYSTERESIS_TIME (1000 * 60 * 3) // 3 minutes
 
 sts_t Status;
 cfg_t Config;
@@ -74,14 +75,55 @@ void act()
     print("Targ Tmp: ");
     print(tempStr);
 
-    /* Verify temperatures and take an action if necessary */
+    // If temperature is above the limit
     if (Status.realTemp > (Config.targetTemp + Config.marginTemp)) {
-        // Turn on
-        setCoolerState(COOLER_ON);
+        Status.coolerOffHysteresisTime = 0;
+        if (!Status.coolerIsOn) {
+            // Get initial hysteresis time
+            if (Status.coolerOnHysteresisTime == 0) {
+                Status.coolerOnHysteresisTime = getMsTimeStamp();
+                hysteresisTimeWarning(true);
+            }
+
+            // If hysteresis time is reached, turn on the cooler
+            if ((getMsTimeStamp() - Status.coolerOnHysteresisTime) > HYSTERESIS_TIME
+                    || (getMsTimeStamp() - Status.coolerOnHysteresisTime) < 0) {
+                // Turn on
+                Status.coolerIsOn = true;
+                Status.coolerOnHysteresisTime = 0;
+                hysteresisTimeWarning(false);
+                setCoolerState(COOLER_ON);
+            }
+        }
     }
+
+    // If temperature reaches the bottom boundary
     else if (Status.realTemp <= (Config.targetTemp - Config.marginTemp)) {
-        // Turn off
-        setCoolerState(COOLER_OFF);
+        Status.coolerOnHysteresisTime = 0;
+        if (Status.coolerIsOn) {
+            // Get initial hysteresis time
+            if (Status.coolerOffHysteresisTime == 0) {
+                Status.coolerOffHysteresisTime = getMsTimeStamp();
+                hysteresisTimeWarning(true);
+            }
+
+            // If hysteresis time is reached, turn on the cooler
+            if ((getMsTimeStamp() - Status.coolerOffHysteresisTime) > HYSTERESIS_TIME
+                    || (getMsTimeStamp() - Status.coolerOffHysteresisTime) < 0) {
+                // Turn off
+                Status.coolerIsOn = false;
+                Status.coolerOffHysteresisTime = 0;
+                hysteresisTimeWarning(false);
+                setCoolerState(COOLER_OFF);
+            }
+        }
+    }
+
+    /// If temperature is inside the boundary
+    else {
+        Status.coolerOnHysteresisTime = 0;
+        Status.coolerOffHysteresisTime = 0;
+        hysteresisTimeWarning(false);
     }
 }
 
@@ -92,6 +134,14 @@ int main (void)
     hwInit();
     cfgStsInit(&Config, &Status);
     clearScreen();
+
+    // Act on the hardware according to the initial status
+    if (Status.coolerIsOn) {
+        setCoolerState(COOLER_ON);
+    }
+    else {
+        setCoolerState(COOLER_OFF);
+    }
 
     while (1) {
         readUserInput();

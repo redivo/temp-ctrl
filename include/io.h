@@ -7,6 +7,7 @@
 #ifndef __IO_H__
 #define __IO_H__
 
+#include <stdbool.h>
 #include "general.h"
 
 /**************************************************************************************************/
@@ -52,6 +53,22 @@ userInput_t userInput();
  * \param  state  Cooler state to be set
  */
 void setCoolerState(coolerState_t state);
+
+/**************************************************************************************************/
+
+/**
+ * \brief  Show or hide hysteresis time acting
+ * \param  display  True to display hysteresis warning and false to hide
+ */
+void hysteresisTimeWarning(bool display);
+
+/**************************************************************************************************/
+
+/**
+ * \brief  Set cooler state warning
+ * \param  isOn  Display 'cooler is on' information
+ */
+void coolerStateWarning(bool isOn);
 
 /**************************************************************************************************/
 

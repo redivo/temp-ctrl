@@ -28,6 +28,10 @@
 #define LED6_BIT 6
 #define LED7_BIT 7
 
+#define LED_COLLER_ON LED2_BIT
+#define LED_HYSTERESIS LED3_BIT
+#define LED_COLLER_OFF LED4_BIT
+
 #define PIN_RELAY 14
 
 #define SW_STEP_DOWN_BIT 4
@@ -234,14 +238,45 @@ void setCoolerState(coolerState_t state)
 {
     switch (state) {
         case COOLER_ON:
-            FIO3PIN &= ~(1 << 26);
-            FIO4PIN &= ~(1 << PIN_RELAY);
+            FIO4PIN |= (1 << PIN_RELAY);
+            coolerStateWarning(true);
             break;
 
         case COOLER_OFF:
-            FIO3PIN |= (1 << 26);
-            FIO4PIN |= (1 << PIN_RELAY);
+            FIO4PIN &= ~(1 << PIN_RELAY);
+            coolerStateWarning(false);
             break;
+    }
+}
+
+/**************************************************************************************************/
+
+void hysteresisTimeWarning(bool display)
+{
+    ms_sleep(100);
+    if (display) {
+        FIO4PIN &= ~(1 << LED_HYSTERESIS);
+    }
+    else {
+        FIO4PIN |= (1 << LED_HYSTERESIS);
+    }
+}
+
+/**************************************************************************************************/
+
+void coolerStateWarning(bool isOn)
+{
+    if (isOn) {
+        ms_sleep(100);
+        FIO4PIN |= (1 << LED_COLLER_OFF);
+        ms_sleep(100);
+        FIO4PIN &= ~(1 << LED_COLLER_ON);
+    }
+    else {
+        ms_sleep(100);
+        FIO4PIN |= (1 << LED_COLLER_ON);
+        ms_sleep(100);
+        FIO4PIN &= ~(1 << LED_COLLER_OFF);
     }
 }
 

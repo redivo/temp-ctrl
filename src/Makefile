@@ -4,7 +4,7 @@
 #*************************************************/
 
 # Targets for PC
-HW_SPECIFIC_IMPL = infra_pucrsDev.o io_pucrsDev.o time_pucrsDev.o temperature_pucrsDev.o
+HW_SPECIFIC_IMPL = infra_pucrsDev.o io_pucrsDev.o timer_pucrsDev.o temperature_pucrsDev.o
 
 #Configuracoes especificas deste projeto
 SERIALDEV = /dev/ttyS0

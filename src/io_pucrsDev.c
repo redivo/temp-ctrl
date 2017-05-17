@@ -28,6 +28,8 @@
 #define LED6_BIT 6
 #define LED7_BIT 7
 
+#define PIN_RELAY 14
+
 #define SW_STEP_DOWN_BIT 4
 #define SW_STEP_UP_BIT 8
 
@@ -126,11 +128,19 @@ void swInit()
 
 /**************************************************************************************************/
 
+void pinInit()
+{
+    FIO4DIR |= 1 << PIN_RELAY;
+}
+
+/**************************************************************************************************/
+
 void ioInit()
 {
     lcdInit();
     ledInit();
     swInit();
+    pinInit();
 }
 
 /**************************************************************************************************/
@@ -225,10 +235,12 @@ void setCoolerState(coolerState_t state)
     switch (state) {
         case COOLER_ON:
             FIO3PIN &= ~(1 << 26);
+            FIO4PIN &= ~(1 << PIN_RELAY);
             break;
 
         case COOLER_OFF:
             FIO3PIN |= (1 << 26);
+            FIO4PIN |= (1 << PIN_RELAY);
             break;
     }
 }

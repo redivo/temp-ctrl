@@ -4,34 +4,21 @@
  */
 /**************************************************************************************************/
 
-#ifndef __TIME_H__
-#define __TIME_H__
-
-#include <stdint.h>
+#include <unistd.h>
+#include "time.h"
 
 /**************************************************************************************************/
 
-/**
- * \brief  Initialize time system
- */
-void timeInit();
+void timeInit()
+{
+    // Do nothing
+}
 
 /**************************************************************************************************/
 
-/**
- * \brief  Sleep for an specific time in miliseconds
- * \param  t  Time, in miliseconds, to sleep
- */
-void ms_sleep(uint32_t t);
+void ms_sleep(uint32_t t)
+{
+    usleep(t * 1000);
+}
 
 /**************************************************************************************************/
-
-/**
- * \brief  Get times stamp in mili seconds
- * \return Time stamp
- */
-uint32_t getMsTimeStamp();
-
-/**************************************************************************************************/
-
-#endif /* __TIME_H__ */

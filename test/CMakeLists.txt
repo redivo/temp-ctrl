@@ -4,6 +4,12 @@
 find_package (GTest REQUIRED)
 find_package (Threads REQUIRED)
 
+# Only compile tests for PC
+if (NOT COMPILE_TESTS)
+    message(STATUS "Skipping tests compilation for platfortm " ${PLATFORM})
+    return()
+endif(NOT COMPILE_TESTS)
+
 include_directories (${INCLUDE_SRC_DIR})
 
 ####################################################################################################

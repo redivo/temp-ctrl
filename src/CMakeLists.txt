@@ -1,13 +1,40 @@
-include_directories (${INCLUDE_SRC_DIR})
+include_directories (${SOURCE_INCLUDE_DIR})
 
-set(TARGET "pc")
+# Build assembly files
+if (COMPILE_ASSEMBLY)
+    set(EXTRA_FILES_TO_COMPILE "${BINARY_SRC_DIR}/crt.o")
+    add_custom_command(
+        OUTPUT ${BINARY_SRC_DIR}/crt.o
+        COMMAND arm-elf-as -mapcs-32 -mcpu=arm7tdmi -o ${BINARY_SRC_DIR}/crt.o ${SOURCE_SRC_DIR}/crt.S
+        DEPENDS ${SOURCE_SRC_DIR}/crt.S
+    )
+endif (COMPILE_ASSEMBLY)
 
-add_executable(temp-ctrl
-    main.c
-    general.c
-    sts_cfg.c
-    infra_${TARGET}.c
-    io_${TARGET}.c
-    temperature_${TARGET}.c
-    timer_${TARGET}.c
-)
+# Build .c files
+if (COMPILE_C)
+    add_executable(temp-ctrl
+        main.c
+        general.c
+        sts_cfg.c
+        infra_${PLATFORM}.c
+        io_${PLATFORM}.c
+        temperature_${PLATFORM}.c
+        timer_${PLATFORM}.c
+        ${EXTRA_FILES_TO_COMPILE}
+    )
+    if (EXTRA_FILES_TO_COMPILE)
+        add_dependencies(temp-ctrl
+            ${EXTRA_FILES_TO_COMPILE}
+        )
+    endif (EXTRA_FILES_TO_COMPILE)
+endif (COMPILE_C)
+
+# Build .hex file
+if (COMPILE_HEX)
+    add_custom_command(
+        OUTPUT temp-ctrl.hex
+        COMMAND arm-elf-objcopy -O ihex temp-ctrl temp-ctrl.hex
+        DEPENDS temp-ctrl
+    )
+    add_custom_target (hexfile ALL DEPENDS "temp-ctrl.hex")
+endif (COMPILE_HEX)

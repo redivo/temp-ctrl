@@ -1,14 +1,36 @@
 cmake_minimum_required(VERSION 2.6)
 project (temp-ctrl)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0") # debug, no optimisation
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage") # enabling coverage
 
 ####################################################################################################
 # Sets
 ####################################################################################################
-set (INCLUDE_SRC_DIR ${CMAKE_SOURCE_DIR}/include)
-set (SOURCE_SRC_DIR ${CMAKE_SOURCE_DIR}/src)
+set(SOURCE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(SOURCE_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+set(BINARY_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src)
+
+
+####################################################################################################
+# Platform
+####################################################################################################
+# Use "camke -D PLATFORM=<desired target>"
+
+if (PLATFORM STREQUAL "pucrsDev")
+    message(STATUS "Building for PUCRS Devboard - " ${PLATFORM})
+    set(CMAKE_C_COMPILER arm-elf-gcc)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nostartfiles -T${SOURCE_SRC_DIR}/lpc2378_flash.ld")
+
+elseif (PLATFORM STREQUAL "pc")
+    message(STATUS "Building for PC - " ${PLATFORM})
+
+else(PLATFORM STREQUAL "pucrsDev")
+    message(FATAL_ERROR "Unknown platform - " ${PLATFORM})
+
+endif(PLATFORM STREQUAL "pucrsDev")
+
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0") # debug, no optimisation
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage") # enabling coverage
+
 
 ####################################################################################################
 # Subdirectories

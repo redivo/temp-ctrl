@@ -18,7 +18,7 @@ addons:
 before_script: cd /usr/src/gtest && sudo cmake CMakeLists.txt && sudo make && sudo cp *.a /usr/lib && cd -
 
 # Build and test script
-script: mkdir -p _build && cd _build && cmake .. && make && test/test
+script: mkdir -p _build && cd _build && cmake -D PLATFORM=pc  .. && make && test/test
 
 after_success:
     - coveralls --exclude lib --exclude tests --gcov-options '\-lp'

@@ -19,15 +19,15 @@ void timeInit();
 /**************************************************************************************************/
 
 /**
- * \brief  Sleep for an specific time in miliseconds
- * \param  t  Time, in miliseconds, to sleep
+ * \brief  Sleep for an specific time in milliseconds
+ * \param  t  Time, in milliseconds, to sleep
  */
 void ms_sleep(uint32_t t);
 
 /**************************************************************************************************/
 
 /**
- * \brief  Get times stamp in mili seconds
+ * \brief  Get times stamp in milliseconds
  * \return Time stamp
  */
 uint32_t getMsTimeStamp();

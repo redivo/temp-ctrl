@@ -37,4 +37,7 @@ if (COMPILE_HEX)
         DEPENDS temp-ctrl
     )
     add_custom_target (hexfile ALL DEPENDS "temp-ctrl.hex")
+
+    # Installation
+    install(CODE "execute_process(COMMAND lpc21isp ${BINARY_SRC_DIR}/temp-ctrl.hex ${TTY} 19200 12000)")
 endif (COMPILE_HEX)

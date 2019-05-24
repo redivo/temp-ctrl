@@ -17,7 +17,6 @@
 #define TARGET_TEMPERATURE_STEP 0.5
 #define HYSTERESIS_TIME (1000 * 60 * 3) // 3 minutes
 
-sts_t Status;
 cfg_t Config;
 
 /**************************************************************************************************/
@@ -147,8 +146,7 @@ int main (void)
         readUserInput();
         updateStatus();
         act();
-
-        ms_sleep(500);
+        ms_sleep(200);
     }
 
     return 0;

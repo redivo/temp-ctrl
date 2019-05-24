@@ -9,6 +9,7 @@
 #include "temperature.h"
 #include "io.h"
 #include "timer.h"
+#include "sts_cfg.h"
 
 /**************************************************************************************************/
 
@@ -73,6 +74,11 @@ typedef union {
 
 /**************************************************************************************************/
 
+typedef enum {
+    IDLE,
+    RUNNING,
+} i2c_state_t;
+
 /**
  * \brief  Run I2C operation in master mode
  * \param  operation  Operation to be done
@@ -81,101 +87,144 @@ typedef union {
                       when it's a write operation
  * \param  dataSize   Size allocated to data
  */
-static void i2c_operation_fsm(uint8_t operation, uint8_t devAddr, uint8_t *data, uint8_t dataSize)
+static i2c_state_t i2c_operation_fsm(uint8_t operation, uint8_t devAddr, uint8_t *data,
+                                     uint8_t dataSize)
 {
-    uint8_t iterations = 0;
+    static i2c_state_t state = IDLE;
+    static uint8_t iterations;
 
-    /* Start I2C */
-    I20CONSET = I2C_CON_START;
+    /* If IDLE, so start I2C */
+    if (state == IDLE) {
+        iterations = 0;
+        I20CONSET = I2C_CON_START;
+        state = RUNNING;
+        return state;
+    }
 
-    while (1) {
-        /* Wait for Interruption */
-        while((I20CONSET & I2C_CON_INTERRUPT) == 0);
+    // Verify if is something new
+    if((I20CONSET & I2C_CON_INTERRUPT) == 0) {
+        return state;
+    }
 
-        switch (I20STAT) {
-            case I2C_STAT_START_BIT_SENT:
-                if (operation == I2C_READ) {
-                    I20DAT = READ_I2C_ADDR(devAddr); // Inform what device i'm communicating
-                }
-                else {
-                    I20DAT = WRITE_I2C_ADDR(devAddr); // Inform what device i'm communicating
-                }
+    switch (I20STAT) {
+        case I2C_STAT_START_BIT_SENT:
+            if (operation == I2C_READ) {
+                I20DAT = READ_I2C_ADDR(devAddr); // Inform what device i'm communicating
+            }
+            else {
+                I20DAT = WRITE_I2C_ADDR(devAddr); // Inform what device i'm communicating
+            }
 
-                I20CONCLR = I2C_CON_START;
-                I20CONCLR = I2C_CON_INTERRUPT;
-                break;
+            I20CONCLR = I2C_CON_START;
+            I20CONCLR = I2C_CON_INTERRUPT;
+            break;
 
-            case I2C_STAT_WRITE_ACK_RCVD:
+        case I2C_STAT_WRITE_ACK_RCVD:
+            I20DAT = data[iterations];
+            iterations++;
+
+            I20CONCLR = I2C_CON_INTERRUPT;
+            break;
+
+        case I2C_STAT_WRITE_DATA_ACK_RCVD:
+            /* If the iterations dont's reach dataSize, continue sending data.
+             * Otherwise end the connection.
+             */
+            if (iterations < dataSize) {
                 I20DAT = data[iterations];
                 iterations++;
-
                 I20CONCLR = I2C_CON_INTERRUPT;
-                break;
-
-            case I2C_STAT_WRITE_DATA_ACK_RCVD:
-                /* If the iterations dont's reach dataSize, continue sending data.
-                 * Otherwise end the connection.
-                 */
-                if (iterations < dataSize) {
-                    I20DAT = data[iterations];
-                    iterations++;
-                    I20CONCLR = I2C_CON_INTERRUPT;
-                }
-                else {
-                    I20CONSET = I2C_CON_STOP;
-                    I20CONCLR = I2C_CON_INTERRUPT;
-                    return;
-                }
-
-                break;
-
-            case I2C_STAT_READ_ACK_RCVD:
-                I20CONSET = I2C_CON_ACK;
-                I20CONCLR = I2C_CON_INTERRUPT;
-                break;
-
-            case I2C_STAT_DATA_RCVD:
-                data[iterations] = I20DAT;
-                iterations++;
-
-                /* If the iterations reach dataSize end connection */
-                if (iterations >= dataSize) {
-                    I20CONCLR = I2C_CON_ACK;
-                }
-
-                I20CONCLR = I2C_CON_INTERRUPT;
-
-                break;
-
-            case I2C_STAT_READ_NACK_RCVD:
+            }
+            else {
                 I20CONSET = I2C_CON_STOP;
                 I20CONCLR = I2C_CON_INTERRUPT;
-                return;
+                state = IDLE;
+                break;
+            }
 
-            case I2C_STAT_WRITE_ACK_NOT_RCVD_AFTER_SLV_ADDR:
-            case I2C_STAT_WRITE_ACK_NOT_RCVD_AFTER_BYTE:
-            case I2C_STAT_READ_NOT_ACK_RCVD_AFTER_SLV_ADDR:
-            default:
-                I20CONSET = I2C_CON_STOP;
-                I20CONCLR = I2C_CON_INTERRUPT;
-                return;
-        }
+            break;
+
+        case I2C_STAT_READ_ACK_RCVD:
+            I20CONSET = I2C_CON_ACK;
+            I20CONCLR = I2C_CON_INTERRUPT;
+            break;
+
+        case I2C_STAT_DATA_RCVD:
+            data[iterations] = I20DAT;
+            iterations++;
+
+            /* If the iterations reach dataSize end connection */
+            if (iterations >= dataSize) {
+                I20CONCLR = I2C_CON_ACK;
+            }
+
+            I20CONCLR = I2C_CON_INTERRUPT;
+
+            break;
+
+        case I2C_STAT_READ_NACK_RCVD:
+            I20CONSET = I2C_CON_STOP;
+            I20CONCLR = I2C_CON_INTERRUPT;
+            state = IDLE;
+            break;
+
+        case I2C_STAT_WRITE_ACK_NOT_RCVD_AFTER_SLV_ADDR:
+        case I2C_STAT_WRITE_ACK_NOT_RCVD_AFTER_BYTE:
+        case I2C_STAT_READ_NOT_ACK_RCVD_AFTER_SLV_ADDR:
+        default:
+            I20CONSET = I2C_CON_STOP;
+            I20CONCLR = I2C_CON_INTERRUPT;
+            state = IDLE;
+            break;
     }
+
+    return state;
 }
 
 /**************************************************************************************************/
 
+typedef enum {
+    INITIALIZING,
+    INFORMING_REGISTER_ADDR,
+    REGISTER_ADDR_INFORMED,
+    READING_TEMP,
+} reading_phase_t;
+
 float readTemperature()
 {
+    static reading_phase_t phase = INITIALIZING;
     uint8_t reg = LM75_TEMP_REG;
-    i2c_operation_fsm(I2C_WRITE, LM75_ADDR, &reg, 1);
+    static uint8_t temp[2];
 
-    uint8_t temp[2];
-    memset(temp, 0, 2);
-    i2c_operation_fsm(I2C_READ, LM75_ADDR, temp, 2);
-    ms_sleep(500);
+    switch (phase) {
+        case INITIALIZING:
+        case INFORMING_REGISTER_ADDR:
+            if (i2c_operation_fsm(I2C_WRITE, LM75_ADDR, &reg, 1) == IDLE) {
+                phase = REGISTER_ADDR_INFORMED;
+            } else {
+                phase = INFORMING_REGISTER_ADDR;
+            }
+            break;
 
-    return two_complement_to_float(temp[0], temp[1], 3);
+        case REGISTER_ADDR_INFORMED:
+            memset(temp, 0, 2);
+            phase = READING_TEMP;
+            break;
+
+        case READING_TEMP:
+            if (i2c_operation_fsm(I2C_READ, LM75_ADDR, temp, 2) == IDLE) {
+                ms_sleep(100);
+                float temperature = two_complement_to_float(temp[0], temp[1], 3);
+                phase = INFORMING_REGISTER_ADDR;
+                return temperature;
+            }
+            break;
+
+        default:
+            break;
+    }
+
+    return Status.realTemp;
 }
 
 /**************************************************************************************************/

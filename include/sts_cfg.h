@@ -37,4 +37,6 @@ void cfgStsInit(cfg_t *cfg, sts_t *sts);
 
 /**************************************************************************************************/
 
+sts_t Status; //!< Golbal status
+
 #endif /* __STS_CFG_H__ */

@@ -13,9 +13,7 @@ void cfgStsInit(cfg_t *cfg, sts_t *sts)
     cfg->targetTemp = 18;
     cfg->marginTemp = 0.5;
     sts->realTemp = 0;
-    sts->coolerOnHysteresisTime = 0;
-    sts->coolerOffHysteresisTime = 0;
-    sts->coolerIsOn = false;
+    sts->hysteresisTime = 0;
 }
 
 /**************************************************************************************************/

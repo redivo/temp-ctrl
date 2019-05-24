@@ -19,6 +19,13 @@ typedef enum {
 
 /**************************************************************************************************/
 
+typedef enum {
+    HEATER_ON,
+    HEATER_OFF,
+} heaterState_t;
+
+/**************************************************************************************************/
+
 /**
  * \brief Initialize IOs
  */
@@ -56,11 +63,27 @@ void setCoolerState(coolerState_t state);
 
 /**************************************************************************************************/
 
-/**
- * \brief  Show or hide hysteresis time acting
- * \param  display  True to display hysteresis warning and false to hide
+ /**
+ * \brief  Control heater state
+ * \param  state  Heater state to be set
  */
-void hysteresisTimeWarning(bool display);
+void setHeaterState(heaterState_t state);
+
+/**************************************************************************************************/
+
+/**
+ * \brief  Show or hide hysteresis time hot warning
+ * \param  display  True to display hysteresis hot warning and false to hide
+ */
+void hysteresisTimeHotWarning(bool display);
+
+/**************************************************************************************************/
+
+/**
+ * \brief  Show or hide hysteresis time cold warning
+ * \param  display  True to display hysteresis cold warning and false to hide
+ */
+void hysteresisTimeColdWarning(bool display);
 
 /**************************************************************************************************/
 
@@ -69,6 +92,14 @@ void hysteresisTimeWarning(bool display);
  * \param  isOn  Display 'cooler is on' information
  */
 void coolerStateWarning(bool isOn);
+
+/**************************************************************************************************/
+
+/**
+ * \brief  Set heater state warning
+ * \param  isOn  Display 'heater is on' information
+ */
+void heaterStateWarning(bool isOn);
 
 /**************************************************************************************************/
 

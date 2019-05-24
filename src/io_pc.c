@@ -58,7 +58,25 @@ void setCoolerState(coolerState_t state)
 
 /**************************************************************************************************/
 
-void hysteresisTimeWarning(bool display)
+void setHeaterState(heaterState_t state);
+{
+    /* TODO
+     * This function is not implemented yet, so do nothing
+     */
+}
+
+/**************************************************************************************************/
+
+void hysteresisTimeHotWarning(bool display)
+{
+    /* TODO
+     * This function is not implemented yet, so do nothing
+     */
+}
+
+/**************************************************************************************************/
+
+void hysteresisTimeColdWarning(bool display)
 {
     /* TODO
      * This function is not implemented yet, so do nothing
@@ -68,6 +86,15 @@ void hysteresisTimeWarning(bool display)
 /**************************************************************************************************/
 
 void coolerStateWarning(bool isOn)
+{
+    /* TODO
+     * This function is not implemented yet, so do nothing
+     */
+}
+
+/**************************************************************************************************/
+
+void heaterStateWarning(bool isOn)
 {
     /* TODO
      * This function is not implemented yet, so do nothing

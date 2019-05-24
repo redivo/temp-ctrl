@@ -15,7 +15,8 @@
 /**************************************************************************************************/
 
 #define TARGET_TEMPERATURE_STEP 0.5
-#define HYSTERESIS_TIME (1000 * 60 * 3) // 3 minutes
+//#define HYSTERESIS_TIME (1000 * 60 * 3) // 3 minutes
+#define HYSTERESIS_TIME (1000 * 10 ) // 3 minutes
 
 cfg_t Config;
 
@@ -58,6 +59,9 @@ typedef enum {
     INIT_HOT_HYSTERESIS,
     WAIT_HOT_HYSTERESIS,
     COOLING,
+    INIT_COLD_HYSTERESIS,
+    WAIT_COLD_HYSTERESIS,
+    HEATING,
 } act_state_t;
 
 /**
@@ -86,32 +90,51 @@ void act()
     switch(state) {
         case IDLE:
             // Turn all off
-            Status.coolerOffHysteresisTime = 0;
-            Status.coolerOnHysteresisTime = 0;
+            Status.hysteresisTime = 0;
             setCoolerState(COOLER_OFF);
-            hysteresisTimeWarning(false);
+            setHeaterState(HEATER_OFF);
+            hysteresisTimeHotWarning(false);
+            hysteresisTimeColdWarning(false);
             break;
 
         case INIT_HOT_HYSTERESIS:
-            Status.coolerOnHysteresisTime = getMsTimeStamp();
-            hysteresisTimeWarning(true);
+            Status.hysteresisTime = getMsTimeStamp();
+            hysteresisTimeHotWarning(true);
             break;
 
         case WAIT_HOT_HYSTERESIS:
             break;
 
         case COOLING:
-            hysteresisTimeWarning(false);
+            hysteresisTimeHotWarning(false);
             setCoolerState(COOLER_ON);
+            break;
+
+        case INIT_COLD_HYSTERESIS:
+            Status.hysteresisTime = getMsTimeStamp();
+            hysteresisTimeColdWarning(true);
+            break;
+
+        case WAIT_COLD_HYSTERESIS:
+            break;
+
+        case HEATING:
+            hysteresisTimeColdWarning(false);
+            setHeaterState(HEATER_ON);
             break;
     }
 
     // Transitions
     switch(state) {
         case IDLE:
-            // If temperature is above the limit
+            // If temperature is above the limits
             if (Status.realTemp > (Config.targetTemp + Config.marginTemp)) {
                 state = INIT_HOT_HYSTERESIS;
+            }
+
+            // If temperature is below the limits
+            else if (Status.realTemp < (Config.targetTemp - Config.marginTemp)) {
+                state = INIT_COLD_HYSTERESIS;
             }
             break;
 
@@ -126,15 +149,39 @@ void act()
             }
 
             // If it stills above the limit and the hysteresis is done, go to cooling
-            else if ((getMsTimeStamp() - Status.coolerOnHysteresisTime) > HYSTERESIS_TIME
-                    || (getMsTimeStamp() - Status.coolerOnHysteresisTime) < 0) {
+            else if ((getMsTimeStamp() - Status.hysteresisTime) > HYSTERESIS_TIME
+                    || (getMsTimeStamp() - Status.hysteresisTime) < 0) {
                 state = COOLING;
             }
             break;
 
         case COOLING:
-            // If cooling reach the target value go back to IDLE
+            // If cooling reaches the target value go back to IDLE
             if (Status.realTemp <= (Config.targetTemp - Config.marginTemp)) {
+                state = IDLE;
+            }
+            break;
+
+        case INIT_COLD_HYSTERESIS:
+            state = WAIT_COLD_HYSTERESIS;
+            break;
+
+        case WAIT_COLD_HYSTERESIS:
+            // If the temperature is within the limit, go back to IDLE
+            if (Status.realTemp >= (Config.targetTemp - Config.marginTemp)) {
+                state = IDLE;
+            }
+
+            // If it stills below the limit and the hysteresis is done, go to heating
+            else if ((getMsTimeStamp() - Status.hysteresisTime) > HYSTERESIS_TIME
+                    || (getMsTimeStamp() - Status.hysteresisTime) < 0) {
+                state = HEATING;
+            }
+            break;
+
+        case HEATING:
+            // If warming reaches the target value go back to IDLE
+            if (Status.realTemp >= (Config.targetTemp + Config.marginTemp)) {
                 state = IDLE;
             }
             break;
@@ -148,14 +195,6 @@ int main (void)
     hwInit();
     cfgStsInit(&Config, &Status);
     clearScreen();
-
-    // Act on the hardware according to the initial status
-    if (Status.coolerIsOn) {
-        setCoolerState(COOLER_ON);
-    }
-    else {
-        setCoolerState(COOLER_OFF);
-    }
 
     while (1) {
         readUserInput();

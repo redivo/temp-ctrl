@@ -28,11 +28,16 @@
 #define LED6_BIT 6
 #define LED7_BIT 7
 
-#define LED_COLLER_ON LED2_BIT
-#define LED_HYSTERESIS LED3_BIT
-#define LED_COLLER_OFF LED4_BIT
+#define LED_COLLER LED2_BIT
+#define LED_HOT_HYSTERESIS LED3_BIT
 
-#define PIN_RELAY 14
+#define LED_COLD_HYSTERESIS LED6_BIT
+#define LED_HEATER LED5_BIT
+
+#define LED_IDLE LED4_BIT
+
+#define COLLER_PIN_RELAY 14
+#define HEATER_PIN_RELAY 12
 
 #define SW_STEP_DOWN_BIT 4
 #define SW_STEP_UP_BIT 8
@@ -134,7 +139,8 @@ void swInit()
 
 void pinInit()
 {
-    FIO4DIR |= 1 << PIN_RELAY;
+    FIO4DIR |= 1 << COLLER_PIN_RELAY;
+    FIO4DIR |= 1 << HEATER_PIN_RELAY;
 }
 
 /**************************************************************************************************/
@@ -238,12 +244,12 @@ void setCoolerState(coolerState_t state)
 {
     switch (state) {
         case COOLER_ON:
-            FIO4PIN |= (1 << PIN_RELAY);
+            FIO4PIN |= (1 << COLLER_PIN_RELAY);
             coolerStateWarning(true);
             break;
 
         case COOLER_OFF:
-            FIO4PIN &= ~(1 << PIN_RELAY);
+            FIO4PIN &= ~(1 << COLLER_PIN_RELAY);
             coolerStateWarning(false);
             break;
     }
@@ -251,14 +257,44 @@ void setCoolerState(coolerState_t state)
 
 /**************************************************************************************************/
 
-void hysteresisTimeWarning(bool display)
+void setHeaterState(heaterState_t state)
+{
+    switch (state) {
+        case HEATER_ON:
+            FIO4PIN |= (1 << HEATER_PIN_RELAY);
+            heaterStateWarning(true);
+            break;
+
+        case HEATER_OFF:
+            FIO4PIN &= ~(1 << HEATER_PIN_RELAY);
+            heaterStateWarning(false);
+            break;
+    }
+}
+
+/**************************************************************************************************/
+
+void hysteresisTimeHotWarning(bool display)
 {
     ms_sleep(100);
     if (display) {
-        FIO4PIN &= ~(1 << LED_HYSTERESIS);
+        FIO4PIN &= ~(1 << LED_HOT_HYSTERESIS);
     }
     else {
-        FIO4PIN |= (1 << LED_HYSTERESIS);
+        FIO4PIN |= (1 << LED_HOT_HYSTERESIS);
+    }
+}
+
+/**************************************************************************************************/
+
+void hysteresisTimeColdWarning(bool display)
+{
+    ms_sleep(100);
+    if (display) {
+        FIO4PIN &= ~(1 << LED_COLD_HYSTERESIS);
+    }
+    else {
+        FIO4PIN |= (1 << LED_COLD_HYSTERESIS);
     }
 }
 
@@ -268,16 +304,33 @@ void coolerStateWarning(bool isOn)
 {
     if (isOn) {
         ms_sleep(100);
-        FIO4PIN |= (1 << LED_COLLER_OFF);
+        FIO4PIN |= (1 << LED_IDLE);
         ms_sleep(100);
-        FIO4PIN &= ~(1 << LED_COLLER_ON);
+        FIO4PIN &= ~(1 << LED_COLLER);
     }
     else {
         ms_sleep(100);
-        FIO4PIN |= (1 << LED_COLLER_ON);
+        FIO4PIN |= (1 << LED_COLLER);
         ms_sleep(100);
-        FIO4PIN &= ~(1 << LED_COLLER_OFF);
+        FIO4PIN &= ~(1 << LED_IDLE);
     }
 }
 
+/**************************************************************************************************/
+
+void heaterStateWarning(bool isOn)
+{
+    if (isOn) {
+        ms_sleep(100);
+        FIO4PIN |= (1 << LED_IDLE);
+        ms_sleep(100);
+        FIO4PIN &= ~(1 << LED_HEATER);
+    }
+    else {
+        ms_sleep(100);
+        FIO4PIN |= (1 << LED_HEATER);
+        ms_sleep(100);
+        FIO4PIN &= ~(1 << LED_IDLE);
+    }
+}
 /**************************************************************************************************/

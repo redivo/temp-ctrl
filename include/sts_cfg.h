@@ -14,8 +14,7 @@
 
 typedef struct {
     float realTemp;
-    uint32_t coolerOnHysteresisTime;
-    uint32_t coolerOffHysteresisTime;
+    uint32_t hysteresisTime;
     bool coolerIsOn;
 } sts_t;
 

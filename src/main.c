@@ -53,11 +53,19 @@ static void updateStatus()
 
 /**************************************************************************************************/
 
+typedef enum {
+    IDLE,
+    INIT_HOT_HYSTERESIS,
+    WAIT_HOT_HYSTERESIS,
+    COOLING,
+} act_state_t;
+
 /**
  * \brief  Act based on status and config
  */
 void act()
 {
+    static state = IDLE;
     char tempStr[7];
 
     // First of all show real temperature
@@ -74,55 +82,62 @@ void act()
     print("Targ Tmp: ");
     print(tempStr);
 
-    // If temperature is above the limit
-    if (Status.realTemp > (Config.targetTemp + Config.marginTemp)) {
-        Status.coolerOffHysteresisTime = 0;
-        if (!Status.coolerIsOn) {
-            // Get initial hysteresis time
-            if (Status.coolerOnHysteresisTime == 0) {
-                Status.coolerOnHysteresisTime = getMsTimeStamp();
-                hysteresisTimeWarning(true);
+    // Actions
+    switch(state) {
+        case IDLE:
+            // Turn all off
+            Status.coolerOffHysteresisTime = 0;
+            Status.coolerOnHysteresisTime = 0;
+            setCoolerState(COOLER_OFF);
+            hysteresisTimeWarning(false);
+            break;
+
+        case INIT_HOT_HYSTERESIS:
+            Status.coolerOnHysteresisTime = getMsTimeStamp();
+            hysteresisTimeWarning(true);
+            break;
+
+        case WAIT_HOT_HYSTERESIS:
+            break;
+
+        case COOLING:
+            hysteresisTimeWarning(false);
+            setCoolerState(COOLER_ON);
+            break;
+    }
+
+    // Transitions
+    switch(state) {
+        case IDLE:
+            // If temperature is above the limit
+            if (Status.realTemp > (Config.targetTemp + Config.marginTemp)) {
+                state = INIT_HOT_HYSTERESIS;
+            }
+            break;
+
+        case INIT_HOT_HYSTERESIS:
+            state = WAIT_HOT_HYSTERESIS;
+            break;
+
+        case WAIT_HOT_HYSTERESIS:
+            // If the temperature is below the limit, go back to IDLE
+            if (Status.realTemp <= (Config.targetTemp + Config.marginTemp)) {
+                state = IDLE;
             }
 
-            // If hysteresis time is reached, turn on the cooler
-            if ((getMsTimeStamp() - Status.coolerOnHysteresisTime) > HYSTERESIS_TIME
+            // If it stills above the limit and the hysteresis is done, go to cooling
+            else if ((getMsTimeStamp() - Status.coolerOnHysteresisTime) > HYSTERESIS_TIME
                     || (getMsTimeStamp() - Status.coolerOnHysteresisTime) < 0) {
-                // Turn on
-                Status.coolerIsOn = true;
-                Status.coolerOnHysteresisTime = 0;
-                hysteresisTimeWarning(false);
-                setCoolerState(COOLER_ON);
+                state = COOLING;
             }
-        }
-    }
+            break;
 
-    // If temperature reaches the bottom boundary
-    else if (Status.realTemp <= (Config.targetTemp - Config.marginTemp)) {
-        Status.coolerOnHysteresisTime = 0;
-        if (Status.coolerIsOn) {
-            // Get initial hysteresis time
-            if (Status.coolerOffHysteresisTime == 0) {
-                Status.coolerOffHysteresisTime = getMsTimeStamp();
-                hysteresisTimeWarning(true);
+        case COOLING:
+            // If cooling reach the target value go back to IDLE
+            if (Status.realTemp <= (Config.targetTemp - Config.marginTemp)) {
+                state = IDLE;
             }
-
-            // If hysteresis time is reached, turn on the cooler
-            if ((getMsTimeStamp() - Status.coolerOffHysteresisTime) > HYSTERESIS_TIME
-                    || (getMsTimeStamp() - Status.coolerOffHysteresisTime) < 0) {
-                // Turn off
-                Status.coolerIsOn = false;
-                Status.coolerOffHysteresisTime = 0;
-                hysteresisTimeWarning(false);
-                setCoolerState(COOLER_OFF);
-            }
-        }
-    }
-
-    /// If temperature is inside the boundary
-    else {
-        Status.coolerOnHysteresisTime = 0;
-        Status.coolerOffHysteresisTime = 0;
-        hysteresisTimeWarning(false);
+            break;
     }
 }
 

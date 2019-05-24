@@ -58,7 +58,7 @@ void setCoolerState(coolerState_t state)
 
 /**************************************************************************************************/
 
-void setHeaterState(heaterState_t state);
+void setHeaterState(heaterState_t state)
 {
     /* TODO
      * This function is not implemented yet, so do nothing

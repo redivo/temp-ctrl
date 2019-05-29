@@ -4,7 +4,7 @@
  */
 /**************************************************************************************************/
 
-#include <arch/nxp/lpc23xx.h>
+#include "lpc23xx.h"
 #include <string.h>
 #include "temperature.h"
 #include "io.h"

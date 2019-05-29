@@ -5,7 +5,7 @@ if (COMPILE_ASSEMBLY)
     set(EXTRA_FILES_TO_COMPILE "${BINARY_SRC_DIR}/crt.o")
     add_custom_command(
         OUTPUT ${BINARY_SRC_DIR}/crt.o
-        COMMAND arm-elf-as -mapcs-32 -mcpu=arm7tdmi -o ${BINARY_SRC_DIR}/crt.o ${SOURCE_SRC_DIR}/crt.S
+        COMMAND arm-none-eabi-as -mapcs-32 -mcpu=arm7tdmi -o ${BINARY_SRC_DIR}/crt.o ${SOURCE_SRC_DIR}/crt.S
         DEPENDS ${SOURCE_SRC_DIR}/crt.S
     )
 endif (COMPILE_ASSEMBLY)
@@ -33,7 +33,7 @@ endif (COMPILE_C)
 if (COMPILE_HEX)
     add_custom_command(
         OUTPUT temp-ctrl.hex
-        COMMAND arm-elf-objcopy -O ihex temp-ctrl temp-ctrl.hex
+        COMMAND arm-none-eabi-objcopy -O ihex temp-ctrl temp-ctrl.hex
         DEPENDS temp-ctrl
     )
     add_custom_target (hexfile ALL DEPENDS "temp-ctrl.hex")

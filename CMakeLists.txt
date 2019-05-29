@@ -9,7 +9,6 @@ set(SOURCE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(SOURCE_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(BINARY_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src)
 
-
 ####################################################################################################
 # Platform
 ####################################################################################################
@@ -17,12 +16,19 @@ set(BINARY_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src)
 
 if (PLATFORM STREQUAL "pucrsDev")
     message(STATUS "Building for PUCRS Devboard - " ${PLATFORM})
-    set(CMAKE_C_COMPILER arm-elf-gcc)
+    set(CMAKE_C_COMPILER arm-none-eabi-gcc)
     #set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-H")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nostartfiles -T${SOURCE_SRC_DIR}/lpc2378_flash.ld")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nostartfiles
+                               -T${SOURCE_SRC_DIR}/lpc2378_flash.ld")
     set(COMPILE_C TRUE)
     set(COMPILE_ASSEMBLY TRUE)
     set(COMPILE_HEX TRUE)
+
+    # Avoid known bug in linux giving:
+    #    arm-none-eabi-gcc: error: unrecognized command line option '-rdynamic'
+    set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
+    set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
+
 
 elseif (PLATFORM STREQUAL "pc")
     set(COMPILE_C TRUE)

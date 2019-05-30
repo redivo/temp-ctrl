@@ -14,28 +14,23 @@ set(BINARY_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src)
 ####################################################################################################
 # Use "camke -D PLATFORM=<desired target>"
 
-if (PLATFORM STREQUAL "pucrsDev")
+if (PLATFORM STREQUAL "devkit_pucrs")
     message(STATUS "Building for PUCRS Devboard - " ${PLATFORM})
     set(CMAKE_C_COMPILER arm-none-eabi-gcc)
     #set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-H")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nostartfiles")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T${SOURCE_SRC_DIR}/lpc2378_flash.ld")
-    set(COMPILE_C TRUE)
-    set(COMPILE_ASSEMBLY TRUE)
-    set(COMPILE_HEX TRUE)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T${SOURCE_SRC_DIR}/${PLATFORM}/lpc2378_flash.ld")
 
     # Avoid known bug in linux giving:
     #    arm-none-eabi-gcc: error: unrecognized command line option '-rdynamic'
     set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
     set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 
-
 elseif (PLATFORM STREQUAL "pc")
-    set(COMPILE_C TRUE)
     set(COMPILE_TESTS TRUE)
     message(STATUS "Building for PC - " ${PLATFORM})
 
-else(PLATFORM STREQUAL "pucrsDev")
+else()
     message(FATAL_ERROR "Unknown platform - " ${PLATFORM})
 
 endif(PLATFORM STREQUAL "pucrsDev")

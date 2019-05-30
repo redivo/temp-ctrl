@@ -15,8 +15,7 @@
 /**************************************************************************************************/
 
 #define TARGET_TEMPERATURE_STEP 0.5
-//#define HYSTERESIS_TIME (1000 * 60 * 3) // 3 minutes
-#define HYSTERESIS_TIME (1000 * 10 ) // 3 minutes
+#define HYSTERESIS_TIME (1000 * 60 * 3) // 3 minutes
 
 cfg_t Config;
 
@@ -69,7 +68,7 @@ typedef enum {
  */
 void act()
 {
-    static state = IDLE;
+    static act_state_t state = IDLE;
     char tempStr[7];
 
     // First of all show real temperature

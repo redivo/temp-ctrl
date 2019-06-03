@@ -1,30 +1,19 @@
 /**************************************************************************************************/
 /**
- * \brief  Infrastructure for PUCRS DevKit
+ * \brief  Serial interface for PUCRS Devkit
  */
 /**************************************************************************************************/
 
-#include "infra.h"
-#include "timer.h"
-#include "io.h"
-#include "temperature.h"
+#ifndef __DEVKIT_PUCRS_INCLUDE_H__
+#define __DEVKIT_PUCRS_INCLUDE_H__
 
 /**************************************************************************************************/
 
-void hwInit()
-{
-    timeInit();
-    ioInit();
-
-#ifdef SERIAL
-    serialInit();
-#endif /* SERIAL */
-
-    /* Now it's possible to print, so do it! */
-    print("Initializing...\r");
-
-    tempInit();
-}
+/**
+ * \brief  Initialize serial interface
+ */
+void serialInit();
 
 /**************************************************************************************************/
 
+#endif /* __DEVKIT_PUCRS_INCLUDE_H__ */

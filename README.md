@@ -25,3 +25,4 @@ You can compile it for the following targets:
 
 ### Other Options ###
  - CLI, passing `-D CLI=enabled` in `cmake` command
+ - DEBUG, passing `-D DEBUG=enabled` in `cmake` command

@@ -18,11 +18,16 @@ add_library(basics STATIC
     io.c
     temperature.c
     timer.c
-    ${CMAKE_CURRENT_BINARY_DIR}/crt.o
 )
-add_dependencies(basics crt)
 set(EXTRA_LIBS ${EXTRA_LIBS} basics)
 set(EXTRA_DEPS ${EXTRA_DEPS} basics)
+
+# Build serial library
+add_library(serial STATIC
+    serial.c
+)
+set(EXTRA_LIBS ${EXTRA_LIBS} serial)
+set(EXTRA_DEPS ${EXTRA_DEPS} serial)
 
 # Build .hex file
 add_custom_command(

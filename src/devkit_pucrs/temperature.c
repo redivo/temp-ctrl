@@ -4,12 +4,12 @@
  */
 /**************************************************************************************************/
 
-#include "lpc23xx.h"
 #include <string.h>
 #include "temperature.h"
 #include "io.h"
 #include "timer.h"
 #include "sts_cfg.h"
+#include "devkit_pucrs/lpc23xx.h"
 
 /**************************************************************************************************/
 
@@ -22,8 +22,8 @@
 #define LM75_ONBOARD_ADDR 0x48
 #define LM75_OFFBORD_ADDR 0x4F
 
-#define LM75_ADDR LM75_OFFBORD_ADDR
-//#define LM75_ADDR LM75_ONBOARD_ADDR
+//#define LM75_ADDR LM75_OFFBORD_ADDR
+#define LM75_ADDR LM75_ONBOARD_ADDR
 
 #define LM75_TEMP_REG 0x00
 

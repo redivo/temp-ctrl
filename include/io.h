@@ -103,4 +103,12 @@ void heaterStateWarning(bool isOn);
 
 /**************************************************************************************************/
 
+/**
+ * \brief  Debug a message. If the debug is disabled it will do nothing
+ * \param  msg  Message to debug
+ */
+void debug(char *msg);
+
+/**************************************************************************************************/
+
 #endif /* __IO_H__ */

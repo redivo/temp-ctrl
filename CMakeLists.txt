@@ -9,6 +9,20 @@ set(SOURCE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(SOURCE_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(BINARY_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/src)
 
+
+####################################################################################################
+# Options
+####################################################################################################
+if (DEBUG STREQUAL "enabled")
+    set(CLI "enabled")
+    add_definitions(-DDEBUG)
+endif()
+
+if (CLI STREQUAL "enabled")
+    add_definitions(-DCLI)
+endif()
+
+
 ####################################################################################################
 # Platform
 ####################################################################################################
@@ -25,6 +39,11 @@ if (PLATFORM STREQUAL "devkit_pucrs")
     #    arm-none-eabi-gcc: error: unrecognized command line option '-rdynamic'
     set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
     set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
+
+    # If CLI is enabled, enable SERIAL
+    if (CLI STREQUAL "enabled")
+        add_definitions(-DSERIAL)
+    endif()
 
 elseif (PLATFORM STREQUAL "pc")
     set(COMPILE_TESTS TRUE)
